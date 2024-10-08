@@ -12,8 +12,6 @@ import { JpytToken } from "@src/JpytToken.sol";
 import { IPool } from "@src/interfaces/external/IPool.sol";
 import { IAggregatorV3 } from "@src/interfaces/external/IAggregatorV3.sol";
 
-import { OPERATOR_ROLE, UPGRADER_ROLE } from "@src/constants/RoleConstants.sol";
-
 contract UsdtDepositManagerTest is Test {
     // Constants
     string private constant OPTIMISM_RPC_URL = "https://optimism-mainnet.public.blastapi.io";
@@ -252,8 +250,8 @@ contract UsdtDepositManagerTest is Test {
     }
 
     function testMultipleUsersDepositAndWithdrawAll() public {
-        uint256 depositAmount1 = 4321 * 1e6; // 4321 USDT
-        uint256 depositAmount2 = 8765 * 1e6; // 8765 USDT
+        uint256 depositAmount1 = 311 * 1e6; // 311 USDT
+        uint256 depositAmount2 = 734 * 1e6; // 734 USDT
 
         _deposit(user1, depositAmount1);
         _deposit(user2, depositAmount2);

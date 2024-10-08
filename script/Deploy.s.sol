@@ -12,11 +12,11 @@ import { IERC20PermitMinimal } from "@src/interfaces/external/IERC20PermitMinima
 
 contract DeployUsdtDepositManager is Script {
     // Optimism mainnet addresses
-    address private constant USDT_USD_PRICE_FEED_ADDRESS = 0xECef79E109e997bCA29c1c0897ec9d7b03647F5E; // chainlink usdt/usd
-    address private constant JPY_USD_PRICE_FEED_ADDRESS = 0x536944c3A71FEb7c1E5C66Ee37d1a148d8D8f619; // chainlink jpy/usd
-    address private constant DEPOSIT_TOKEN_ADDRESS = 0x94b008aA00579c1307B0EF2c499aD98a8ce58e58; // USDT on Optimism
-    address private constant AAVE_POOL_ADDRESS = 0x794a61358D6845594F94dc1DB02A252b5b4814aD; // aave pool mainnet op
-    
+    address private constant USDT_USD_PRICE_FEED = 0xECef79E109e997bCA29c1c0897ec9d7b03647F5E; // chainlink usdt/usd
+    address private constant JPY_USD_PRICE_FEED = 0x536944c3A71FEb7c1E5C66Ee37d1a148d8D8f619; // chainlink jpy/usd
+    address private constant DEPOSIT_TOKEN = 0x94b008aA00579c1307B0EF2c499aD98a8ce58e58; // USDT on Optimism
+    address private constant AAVE_POOL = 0x794a61358D6845594F94dc1DB02A252b5b4814aD; // aave pool mainnet op
+
     address private constant DEFAULT_ADMIN = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
     address private constant PAUSER = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
     address private constant OPERATOR = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
@@ -50,11 +50,11 @@ contract DeployUsdtDepositManager is Script {
                     DEFAULT_ADMIN,
                     PAUSER,
                     OPERATOR,
-                    AAVE_POOL_ADDRESS,
-                    DEPOSIT_TOKEN_ADDRESS,
-                    USDT_USD_PRICE_FEED_ADDRESS,
+                    AAVE_POOL,
+                    DEPOSIT_TOKEN,
+                    USDT_USD_PRICE_FEED,
                     address(jpytToken),
-                    JPY_USD_PRICE_FEED_ADDRESS,
+                    JPY_USD_PRICE_FEED,
                     10 // initialCooldownBlocks
                 )
             )

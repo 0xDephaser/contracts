@@ -37,6 +37,19 @@ Dephaser is a decentralized finance (DeFi) protocol that allows users to deposit
    - Optional protocol fees can be applied on deposits.
    - Accumulated yield will be distributed back to users in future implementations.
 
+## Flowcharts
+
+To better illustrate the deposit and withdrawal processes, please refer to the following flowcharts:
+
+![Deposit Flowchart](images/deposit.jpg)
+*Figure 1: Deposit Process Flowchart*
+
+![Withdrawal Flowchart](images/withdrawal.jpg)
+*Figure 2: Withdrawal Process Flowchart*
+
+These flowcharts provide a visual representation of the key steps involved in depositing USDT and withdrawing funds from the Dephaser protocol.
+
+
 ## Yield Distribution
 
 While the current implementation retains yield generated from Aave within the protocol, future updates will introduce mechanisms to distribute this yield back to users. 
@@ -56,6 +69,3 @@ The protocol is designed to be deployed on Optimism, leveraging its lower gas fe
 
 Comprehensive unit tests and fuzz tests are implemented to ensure the robustness and correctness of the protocol under various scenarios.
 
-## Disclaimer
-
-This protocol is experimental. Use at your own risk. Always conduct thorough audits before using in production.
