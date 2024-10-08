@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.27;
 
-import {IAggregatorV3} from "@src/interfaces/external/IAggregatorV3.sol";
+import { IAggregatorV3 } from "@src/interfaces/external/IAggregatorV3.sol";
 
 /**
  * @title IDepositManager
@@ -165,7 +165,14 @@ interface IDepositManager {
      * @param s The s value of the permit signature
      * @dev This function works like `deposit` but uses EIP-2612 permit for approval
      */
-    function depositWithPermit(address to, uint256 depositAmount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+    function depositWithPermit(
+        address to,
+        uint256 depositAmount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
         external;
 
     /**
@@ -196,7 +203,8 @@ interface IDepositManager {
      *      1. Check if the cooldown period has passed
      *      2. Transfer the prepared deposit tokens to the user
      *      3. Delete the withdrawal request
-     *      e.g., If a withdrawal of 100 USDC was requested and the cooldown has passed, it will transfer 100 USDC to the user
+     *      e.g., If a withdrawal of 100 USDC was requested and the cooldown has passed, it will transfer 100 USDC to
+     * the user
      */
     function executeWithdrawal() external;
 

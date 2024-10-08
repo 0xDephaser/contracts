@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
-import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IPool} from "@src/interfaces/external/IPool.sol";
-import {IAggregatorV3} from "@src/interfaces/external/IAggregatorV3.sol";
-import {IERC20MintableBurnable} from "@src/interfaces/external/IERC20MintableBurnable.sol";
-import {IERC20PermitMinimal} from "@src/interfaces/external/IERC20PermitMinimal.sol";
-import {IDepositManager} from "@src/interfaces/internal/IDepositManager.sol";
+import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IPool } from "@src/interfaces/external/IPool.sol";
+import { IAggregatorV3 } from "@src/interfaces/external/IAggregatorV3.sol";
+import { IERC20MintableBurnable } from "@src/interfaces/external/IERC20MintableBurnable.sol";
+import { IERC20PermitMinimal } from "@src/interfaces/external/IERC20PermitMinimal.sol";
+import { IDepositManager } from "@src/interfaces/internal/IDepositManager.sol";
 
 import {
     EXCHANGE_RATE_SCALE,
@@ -22,13 +22,13 @@ import {
     MIN_PROTOCOL_FEE_BPS,
     MAX_PROTOCOL_FEE_BPS
 } from "@src/constants/NumericConstants.sol";
-import {PAUSER_ROLE, OPERATOR_ROLE, UPGRADER_ROLE, UNPAUSER_ROLE} from "@src/constants/RoleConstants.sol";
+import { PAUSER_ROLE, OPERATOR_ROLE, UPGRADER_ROLE, UNPAUSER_ROLE } from "@src/constants/RoleConstants.sol";
 
 /**
- * @title DepositManager
+ * @title UsdtDepositManager
  * @notice Manages deposits, withdrawals, and exchange between deposit tokens and JPY tokens
  */
-contract DepositManager is
+contract UsdtDepositManager is
     IDepositManager,
     Initializable,
     UUPSUpgradeable,
@@ -98,7 +98,10 @@ contract DepositManager is
         address jpyTokenAddress,
         address jpyUsdPriceFeedAddress,
         uint256 initialCooldownBlocks
-    ) public initializer {
+    )
+        public
+        initializer
+    {
         __AccessControl_init();
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
@@ -222,7 +225,14 @@ contract DepositManager is
     /**
      * @inheritdoc IDepositManager
      */
-    function depositWithPermit(address to, uint256 depositAmount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+    function depositWithPermit(
+        address to,
+        uint256 depositAmount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
         external
         override
         whenNotPaused
@@ -248,7 +258,13 @@ contract DepositManager is
     /**
      * @inheritdoc IDepositManager
      */
-    function requestWithdrawalWithPermit(uint256 jpyAmount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+    function requestWithdrawalWithPermit(
+        uint256 jpyAmount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
         external
         override
         whenNotPaused
@@ -334,7 +350,8 @@ contract DepositManager is
     /**
      * @notice Pause the contract's core functionality
      * @dev Only callable by PAUSER_ROLE when contract is not paused
-     * @notice Pausing is for emergency situations and restricts most operations like deposit, requestWithdrawal, executeWithdrawal, etc.
+     * @notice Pausing is for emergency situations and restricts most operations like deposit, requestWithdrawal,
+     * executeWithdrawal, etc.
      */
     function pause() external whenNotPaused onlyRole(PAUSER_ROLE) {
         _pause();
@@ -379,7 +396,8 @@ contract DepositManager is
      * @dev Handles the deposit process
      * @param recipient Address to receive minted JPY tokens
      * @param depositAmount Amount of deposit tokens to be deposited
-     * @notice Transfers deposit tokens, applies fee, supplies to Aave, updates totalDepositToken, totalMintedJpy, and totalFeeAmount and mints JPY tokens
+     * @notice Transfers deposit tokens, applies fee, supplies to Aave, updates totalDepositToken, totalMintedJpy, and
+     * totalFeeAmount and mints JPY tokens
      */
     function _deposit(address recipient, uint256 depositAmount) internal {
         address sender = _msgSender();
@@ -407,7 +425,8 @@ contract DepositManager is
      * @dev Handles the withdrawal request process
      * @param recipient Address requesting withdrawal
      * @param jpyAmount Amount of JPY tokens to withdraw
-     * @notice Burns JPY tokens, calculates average JPY/deposit token rate, converts JPY to deposit token amount, and requests withdrawal
+     * @notice Burns JPY tokens, calculates average JPY/deposit token rate, converts JPY to deposit token amount, and
+     * requests withdrawal
      */
     function _requestWithdrawal(address recipient, uint256 jpyAmount) internal {
         jpyToken.burnFrom(recipient, jpyAmount);
@@ -418,7 +437,7 @@ contract DepositManager is
         uint256 tokenAmount = (jpyAmount * EXCHANGE_RATE_SCALE) / currentRate;
 
         withdrawalRequests[recipient] =
-            WithdrawalRequest({jpyAmount: jpyAmount, tokenAmount: tokenAmount, requestBlock: block.number});
+            WithdrawalRequest({ jpyAmount: jpyAmount, tokenAmount: tokenAmount, requestBlock: block.number });
 
         totalMintedJpy -= jpyAmount;
         totalDepositToken -= tokenAmount;
@@ -480,5 +499,5 @@ contract DepositManager is
      * @dev Only callable by UPGRADER_ROLE
      * @param newImplementation The address of the new implementation contract
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) { }
 }
