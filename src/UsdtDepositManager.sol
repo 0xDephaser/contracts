@@ -238,7 +238,7 @@ contract UsdtDepositManager is
         whenNotPaused
         nonReentrant
     {
-        IERC20PermitMinimal(address(depositToken)).permit(to, address(this), depositAmount, deadline, v, r, s);
+        _trustlessPermit(address(depositToken), to, address(this), depositAmount, deadline, v, r, s);
         _deposit(to, depositAmount);
     }
 
@@ -271,8 +271,7 @@ contract UsdtDepositManager is
         nonReentrant
     {
         address sender = _msgSender();
-
-        IERC20PermitMinimal(address(jpyToken)).permit(sender, address(this), jpyAmount, deadline, v, r, s);
+        _trustlessPermit(address(jpyToken), sender, address(this), jpyAmount, deadline, v, r, s);
         _requestWithdrawal(sender, jpyAmount);
     }
 
@@ -492,6 +491,44 @@ contract UsdtDepositManager is
         uint256 usdAmount = amount * depositTokenUsdRate / (10 ** depositTokenRateDecimals);
         // Then convert USD to JPY
         return usdAmount * (10 ** jpyRateDecimals) / jpyUsdRate;
+    }
+
+    /**
+     * @notice Executes a permit operation or checks for sufficient allowance
+     * @dev This function implements a mitigation for the EIP-2612 frontrunning vulnerability
+     * @param token The address of the token contract
+     * @param owner The address of the token owner
+     * @param spender The address of the spender
+     * @param value The amount of tokens to be approved
+     * @param deadline The deadline for the permit
+     * @param v The v component of the signature
+     * @param r The r component of the signature
+     * @param s The s component of the signature
+     * @notice This implementation addresses the vulnerability described in:
+     * https://www.trust-security.xyz/post/permission-denied
+     */
+    function _trustlessPermit(
+        address token,
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        internal
+    {
+        // Try permit() before allowance check to advance nonce if possible
+        try IERC20PermitMinimal(token).permit(owner, spender, value, deadline, v, r, s) {
+            return;
+        } catch {
+            // Permit potentially got frontran. Continue anyways if allowance is sufficient.
+            if (IERC20(token).allowance(owner, spender) >= value) {
+                return;
+            }
+        }
+        revert("Permit failure");
     }
 
     /*
