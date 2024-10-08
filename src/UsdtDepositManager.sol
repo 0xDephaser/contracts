@@ -6,6 +6,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IPool } from "@src/interfaces/external/IPool.sol";
@@ -37,6 +38,7 @@ contract UsdtDepositManager is
     ReentrancyGuardUpgradeable
 {
     using SafeERC20 for IERC20;
+    using Math for uint256;
 
     /// @notice The cooldown period in blocks that must pass before a withdrawal can be executed
     uint256 public cooldownBlocks;
@@ -190,7 +192,7 @@ contract UsdtDepositManager is
         uint256 jpyAmount = _convertToJpy(amountAfterFee);
 
         // return the rate with 8 decimal places
-        return (depositBaseAmount * EXCHANGE_RATE_SCALE) / jpyAmount;
+        return Math.mulDiv(depositBaseAmount, EXCHANGE_RATE_SCALE, jpyAmount, Math.Rounding.Floor);
     }
 
     /**
@@ -212,7 +214,7 @@ contract UsdtDepositManager is
         if (totalMintedJpy == 0) {
             return 0;
         }
-        return (totalDepositToken * EXCHANGE_RATE_SCALE) / totalMintedJpy;
+        return Math.mulDiv(totalDepositToken, EXCHANGE_RATE_SCALE, totalMintedJpy, Math.Rounding.Floor);
     }
 
     /**
@@ -433,8 +435,8 @@ contract UsdtDepositManager is
         uint256 currentRate = _getJpyToDepositTokenAverageRate();
 
         // Convert JPY to deposit token amount
-        uint256 tokenAmount = (jpyAmount * EXCHANGE_RATE_SCALE) / currentRate;
 
+        uint256 tokenAmount = Math.mulDiv(jpyAmount, EXCHANGE_RATE_SCALE, currentRate, Math.Rounding.Floor);
         withdrawalRequests[recipient] =
             WithdrawalRequest({ jpyAmount: jpyAmount, tokenAmount: tokenAmount, requestBlock: block.number });
 
@@ -464,7 +466,7 @@ contract UsdtDepositManager is
         if (totalDepositToken == 0) {
             return 0;
         }
-        return (totalMintedJpy * EXCHANGE_RATE_SCALE) / totalDepositToken;
+        return Math.mulDiv(totalMintedJpy, EXCHANGE_RATE_SCALE, totalDepositToken, Math.Rounding.Ceil);
     }
 
     /**
@@ -473,7 +475,7 @@ contract UsdtDepositManager is
      * @return The amount after applying the fee and the fee amount
      */
     function _applyProtocolFee(uint256 amount) internal view returns (uint256, uint256) {
-        uint256 feeAmount = (amount * protocolFeeBps) / ONE_HUNDRED_PERCENT_IN_BP;
+        uint256 feeAmount = Math.mulDiv(amount, protocolFeeBps, ONE_HUNDRED_PERCENT_IN_BP, Math.Rounding.Ceil);
         uint256 amountAfterFee = amount - feeAmount;
         return (amountAfterFee, feeAmount);
     }
@@ -488,9 +490,10 @@ contract UsdtDepositManager is
         (uint256 jpyUsdRate, uint8 jpyRateDecimals) = getTokenUsdRate(address(jpyToken));
 
         // Convert deposit token to USD.
-        uint256 usdAmount = amount * depositTokenUsdRate / (10 ** depositTokenRateDecimals);
+        uint256 usdAmount = Math.mulDiv(amount, depositTokenUsdRate, 10 ** depositTokenRateDecimals, Math.Rounding.Floor);
+
         // Then convert USD to JPY
-        return usdAmount * (10 ** jpyRateDecimals) / jpyUsdRate;
+        return Math.mulDiv(usdAmount, 10 ** jpyRateDecimals, jpyUsdRate, Math.Rounding.Floor);
     }
 
     /**
