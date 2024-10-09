@@ -266,7 +266,13 @@ contract UsdtDepositManager is
         nonReentrant
     {
         address sender = _msgSender();
+        
+        if (withdrawalRequests[sender].jpyAmount > 0) {
+            revert WithdrawalRequestPending();
+        }
+
         _trustlessPermit(address(jpyToken), sender, address(this), jpyAmount, deadline, v, r, s);
+        
         _requestWithdrawal(sender, jpyAmount);
     }
 
