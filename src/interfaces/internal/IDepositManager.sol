@@ -31,6 +31,22 @@ interface IDepositManager {
         uint256 requestBlock;
     }
 
+    /**
+     * @notice Thrown when the token address provided is zero
+     */
+    error ZeroTokenAddress();
+
+    /**
+     * @notice Thrown when the price feed address provided is zero
+     */
+    error ZeroPriceFeedAddress();
+
+    /**
+     * @notice Thrown when the price feed has invalid decimals
+     * @param decimals The invalid decimals value
+     */
+    error InvalidPriceFeedDecimals(uint8 decimals);
+
     /* 
      * @notice Thrown when a withdrawal request is already pending
      */

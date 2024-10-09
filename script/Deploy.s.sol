@@ -18,7 +18,6 @@ contract DeployUsdtDepositManager is Script {
     address private constant AAVE_POOL = 0x794a61358D6845594F94dc1DB02A252b5b4814aD; // aave pool mainnet op
 
     address private constant DEFAULT_ADMIN = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
-    address private constant PAUSER = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
     address private constant OPERATOR = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
 
     JpytToken public jpytToken;
@@ -48,7 +47,6 @@ contract DeployUsdtDepositManager is Script {
                 UsdtDepositManager.initialize,
                 (
                     DEFAULT_ADMIN,
-                    PAUSER,
                     OPERATOR,
                     AAVE_POOL,
                     DEPOSIT_TOKEN,

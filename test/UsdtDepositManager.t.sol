@@ -12,7 +12,7 @@ import { JpytToken } from "@src/JpytToken.sol";
 import { IPool } from "@src/interfaces/external/IPool.sol";
 import { IAggregatorV3 } from "@src/interfaces/external/IAggregatorV3.sol";
 
-import { PAUSER_ROLE, OPERATOR_ROLE, UPGRADER_ROLE, UNPAUSER_ROLE } from "@src/constants/RoleConstants.sol";
+import { OPERATOR_ROLE, UPGRADER_ROLE } from "@src/constants/RoleConstants.sol";
 
 contract UsdtDepositManagerTest is Test {
     // Constants
@@ -35,8 +35,7 @@ contract UsdtDepositManagerTest is Test {
 
     // Addresses
     address public constant DEFAULT_ADMIN = address(1);
-    address public constant PAUSER = address(2);
-    address public constant OPERATOR = address(3);
+    address public constant OPERATOR = address(2);
     address public user1;
     address public user2;
 
@@ -69,7 +68,6 @@ contract UsdtDepositManagerTest is Test {
                     UsdtDepositManager.initialize,
                     (
                         DEFAULT_ADMIN,
-                        PAUSER,
                         OPERATOR,
                         AAVE_POOL_ADDRESS,
                         DEPOSIT_TOKEN_ADDRESS,
@@ -141,11 +139,6 @@ contract UsdtDepositManagerTest is Test {
     function testGetDepositRate() public view {
         uint256 depositRate = depositManager.getDepositRate();
         assertGt(depositRate, 0, "Deposit rate should be greater than 0");
-    }
-
-    function testPauseAndUnpause() public {
-        _pauseContract();
-        _unpauseContract();
     }
 
     function testSetProtocolFeeBps() public {
@@ -237,11 +230,11 @@ contract UsdtDepositManagerTest is Test {
         assertGt(user2JpyBalance, 0, "User 2 should have JPYT");
         assertEq(depositManager.totalDepositToken(), depositAmount1 + depositAmount2, "Incorrect total deposit token");
 
+        vm.roll(block.number + depositManager.cooldownBlocks() + 1);
         _requestWithdrawal(user1, user1JpyBalance / 2);
         _requestWithdrawal(user2, user2JpyBalance / 3);
 
         vm.roll(block.number + depositManager.cooldownBlocks() + 1);
-
         _executeWithdrawal(user1);
         _executeWithdrawal(user2);
 
@@ -291,10 +284,12 @@ contract UsdtDepositManagerTest is Test {
 
         deal(DEPOSIT_TOKEN_ADDRESS, user1, depositAmount);
 
-        _deposit(user1, depositAmount);        
+        _deposit(user1, depositAmount);
         uint256 jpyBalance = jpytToken.balanceOf(user1);
-        
+
         uint256 withdrawAmount = (jpyBalance * withdrawalFraction) / 100;
+        
+        vm.roll(block.number + depositManager.cooldownBlocks() + 1);
         _requestWithdrawal(user1, withdrawAmount);
 
         vm.roll(block.number + depositManager.cooldownBlocks() + 1);
@@ -348,26 +343,6 @@ contract UsdtDepositManagerTest is Test {
     function _executeWithdrawal(address user) internal {
         vm.prank(user);
         depositManager.executeWithdrawal();
-    }
-
-    function _pauseContract() internal {
-        vm.prank(PAUSER);
-        depositManager.pause();
-        assertTrue(depositManager.paused(), "Contract should be paused");
-
-        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
-        vm.prank(user1);
-        depositManager.deposit(user1, 1000 * 1e6);
-    }
-
-    function _unpauseContract() internal {
-        vm.prank(DEFAULT_ADMIN);
-        depositManager.unpause();
-        assertFalse(depositManager.paused(), "Contract should be unpaused");
-
-        uint256 depositAmount = 1000 * 1e6;
-        _deposit(user1, depositAmount);
-        assertGt(jpytToken.balanceOf(user1), 0, "Deposit should succeed after unpausing");
     }
 
     function _getERC20PermitTypeDataHash(

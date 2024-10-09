@@ -23,7 +23,7 @@ import {
     MIN_PROTOCOL_FEE_BPS,
     MAX_PROTOCOL_FEE_BPS
 } from "@src/constants/NumericConstants.sol";
-import { PAUSER_ROLE, OPERATOR_ROLE, UPGRADER_ROLE, UNPAUSER_ROLE } from "@src/constants/RoleConstants.sol";
+import { OPERATOR_ROLE, UPGRADER_ROLE } from "@src/constants/RoleConstants.sol";
 
 /**
  * @title UsdtDepositManager
@@ -38,7 +38,6 @@ contract UsdtDepositManager is
     ReentrancyGuardUpgradeable
 {
     using SafeERC20 for IERC20;
-    using Math for uint256;
 
     /// @notice The cooldown period in blocks that must pass before a withdrawal can be executed
     uint256 public cooldownBlocks;
@@ -81,7 +80,6 @@ contract UsdtDepositManager is
     /**
      * @notice Initializes the DepositManager contract
      * @param defaultAdmin Address of the default admin
-     * @param pauser Address with pauser role
      * @param operator Address with operator role
      * @param aavePoolAddress Address of the Aave pool
      * @param depositTokenAddress Address of the deposit token
@@ -92,7 +90,6 @@ contract UsdtDepositManager is
      */
     function initialize(
         address defaultAdmin,
-        address pauser,
         address operator,
         address aavePoolAddress,
         address depositTokenAddress,
@@ -110,9 +107,7 @@ contract UsdtDepositManager is
         __Pausable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _grantRole(PAUSER_ROLE, pauser);
         _grantRole(OPERATOR_ROLE, operator);
-        _grantRole(UNPAUSER_ROLE, defaultAdmin);
 
         _setCooldownBlocks(initialCooldownBlocks);
         _setPriceFeed(jpyTokenAddress, jpyUsdPriceFeedAddress);
@@ -220,7 +215,7 @@ contract UsdtDepositManager is
     /**
      * @inheritdoc IDepositManager
      */
-    function deposit(address to, uint256 depositAmount) external override whenNotPaused nonReentrant {
+    function deposit(address to, uint256 depositAmount) external override nonReentrant {
         _deposit(to, depositAmount);
     }
 
@@ -237,7 +232,6 @@ contract UsdtDepositManager is
     )
         external
         override
-        whenNotPaused
         nonReentrant
     {
         _trustlessPermit(address(depositToken), to, address(this), depositAmount, deadline, v, r, s);
@@ -247,7 +241,7 @@ contract UsdtDepositManager is
     /**
      * @inheritdoc IDepositManager
      */
-    function requestWithdrawal(uint256 jpyAmount) external override whenNotPaused nonReentrant {
+    function requestWithdrawal(uint256 jpyAmount) external override nonReentrant {
         address sender = _msgSender();
 
         if (withdrawalRequests[sender].jpyAmount > 0) {
@@ -269,7 +263,6 @@ contract UsdtDepositManager is
     )
         external
         override
-        whenNotPaused
         nonReentrant
     {
         address sender = _msgSender();
@@ -280,7 +273,7 @@ contract UsdtDepositManager is
     /**
      * @inheritdoc IDepositManager
      */
-    function executeWithdrawal() external override whenNotPaused nonReentrant {
+    function executeWithdrawal() external override nonReentrant {
         address sender = _msgSender();
 
         WithdrawalRequest memory request = withdrawalRequests[sender];
@@ -348,29 +341,22 @@ contract UsdtDepositManager is
         emit AaveProfitWithdrawn(profit);
     }
 
-    /**
-     * @notice Pause the contract's core functionality
-     * @dev Only callable by PAUSER_ROLE when contract is not paused
-     * @notice Pausing is for emergency situations and restricts most operations like deposit, requestWithdrawal,
-     * executeWithdrawal, etc.
-     */
-    function pause() external whenNotPaused onlyRole(PAUSER_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @notice Unpause the contract, re-enabling core functionality
-     * @dev Only callable by UNPAUSER_ROLE when contract is paused
-     * @notice Ensure all issues are resolved before unpausing
-     */
-    function unpause() external whenPaused onlyRole(UNPAUSER_ROLE) {
-        _unpause();
-    }
-
     // Internal administrative functions
     function _setPriceFeed(address token, address priceFeedAddress) internal {
+        if (token == address(0)) {
+            revert ZeroTokenAddress();
+        }
+
+        if (priceFeedAddress == address(0)) {
+            revert ZeroPriceFeedAddress();
+        }
+
         IAggregatorV3 priceFeed = IAggregatorV3(priceFeedAddress);
         uint8 decimals = priceFeed.decimals();
+
+        if (decimals == 0) {
+            revert InvalidPriceFeedDecimals(decimals);
+        }
 
         tokenUsdPriceFeeds[token] = PriceFeedInfo(priceFeed, decimals);
 
@@ -490,7 +476,8 @@ contract UsdtDepositManager is
         (uint256 jpyUsdRate, uint8 jpyRateDecimals) = getTokenUsdRate(address(jpyToken));
 
         // Convert deposit token to USD.
-        uint256 usdAmount = Math.mulDiv(amount, depositTokenUsdRate, 10 ** depositTokenRateDecimals, Math.Rounding.Floor);
+        uint256 usdAmount =
+            Math.mulDiv(amount, depositTokenUsdRate, 10 ** depositTokenRateDecimals, Math.Rounding.Floor);
 
         // Then convert USD to JPY
         return Math.mulDiv(usdAmount, 10 ** jpyRateDecimals, jpyUsdRate, Math.Rounding.Floor);
