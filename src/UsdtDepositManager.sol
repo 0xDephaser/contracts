@@ -418,7 +418,7 @@ contract UsdtDepositManager is
     function _requestWithdrawal(address recipient, uint256 jpyAmount) internal {
         jpyToken.burnFrom(recipient, jpyAmount);
 
-        uint256 currentRate = _getJpyToDepositTokenAverageRate();
+        uint256 currentRate = getJpyToDepositTokenAverageRate();
 
         // Convert JPY to deposit token amount
 
@@ -448,7 +448,7 @@ contract UsdtDepositManager is
      * @notice Example:
      * If the function returns 13699000000, it means the average rate is 1 deposit token = 136.99 JPY
      */
-    function _getJpyToDepositTokenAverageRate() public view returns (uint256) {
+    function getJpyToDepositTokenAverageRate() public view returns (uint256) {
         if (totalDepositToken == 0) {
             return 0;
         }
