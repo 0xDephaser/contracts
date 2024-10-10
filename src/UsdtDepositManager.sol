@@ -4,7 +4,6 @@ pragma solidity 0.8.27;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -34,7 +33,6 @@ contract UsdtDepositManager is
     Initializable,
     UUPSUpgradeable,
     AccessControlUpgradeable,
-    PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
     using SafeERC20 for IERC20;
@@ -104,7 +102,6 @@ contract UsdtDepositManager is
         __AccessControl_init();
         __UUPSUpgradeable_init();
         __ReentrancyGuard_init();
-        __Pausable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
         _grantRole(OPERATOR_ROLE, operator);
