@@ -7,10 +7,10 @@ import { ERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { AccessControlEnumerable } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 
-/// @title JpytToken
+/// @title DephaserJPY
 /// @notice This contract implements a custom ERC20 token with minting and burning capabilities
 /// @dev Extends ERC20, ERC20Permit, and AccessControlEnumerable
-contract JpytToken is AccessControlEnumerable, ERC20, ERC20Permit {
+contract DephaserJPY is AccessControlEnumerable, ERC20, ERC20Permit {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
@@ -19,7 +19,7 @@ contract JpytToken is AccessControlEnumerable, ERC20, ERC20Permit {
      * @dev Sets up the default admin role
      * @param defaultAdmin The address to be granted the default admin role
      */
-    constructor(address defaultAdmin) ERC20("JpytToken", "JPYT") ERC20Permit("JpytToken") {
+    constructor(address defaultAdmin) ERC20("Dephaser JPY", "JPYT") ERC20Permit("Dephaser JPY") {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     }
 

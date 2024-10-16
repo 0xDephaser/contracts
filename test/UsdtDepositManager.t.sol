@@ -8,7 +8,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 
 import { UsdtDepositManager } from "@src/UsdtDepositManager.sol";
-import { JpytToken } from "@src/JpytToken.sol";
+import { DephaserJPY } from "@src/DephaserJPY.sol";
 import { IPool } from "@src/interfaces/external/IPool.sol";
 import { IAggregatorV3 } from "@src/interfaces/external/IAggregatorV3.sol";
 
@@ -27,7 +27,7 @@ contract UsdtDepositManagerTest is Test {
 
     // Contracts
     UsdtDepositManager public depositManager;
-    JpytToken public jpytToken;
+    DephaserJPY public jpytToken;
     IERC20 public depositToken;
     IPool public aavePool;
     IAggregatorV3 public usdtPriceFeed;
@@ -59,7 +59,7 @@ contract UsdtDepositManagerTest is Test {
         usdtPriceFeed = IAggregatorV3(USDT_USD_PRICE_FEED_ADDRESS);
         jpyPriceFeed = IAggregatorV3(JPY_USD_PRICE_FEED_ADDRESS);
 
-        jpytToken = new JpytToken(DEFAULT_ADMIN);
+        jpytToken = new DephaserJPY(DEFAULT_ADMIN);
 
         depositManager = UsdtDepositManager(
             Upgrades.deployUUPSProxy(

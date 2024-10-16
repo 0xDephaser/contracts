@@ -4,7 +4,7 @@ pragma solidity 0.8.27;
 import { console2 } from "forge-std/console2.sol";
 import { Script } from "forge-std/Script.sol";
 import { Upgrades } from "openzeppelin-foundry-upgrades/Upgrades.sol";
-import { JpytToken } from "@src/JpytToken.sol";
+import { DephaserJPY } from "@src/DephaserJPY.sol";
 import { UsdtDepositManager } from "@src/UsdtDepositManager.sol";
 import { UPGRADER_ROLE, OPERATOR_ROLE } from "@src/constants/RoleConstants.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -20,7 +20,7 @@ contract DeployUsdtDepositManager is Script {
     address private constant DEFAULT_ADMIN = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
     address private constant OPERATOR = 0xFFE99E1864c30723a51ec4aEB465fd138f3b7ff0; // change this to your address
 
-    JpytToken public jpytToken;
+    DephaserJPY public jpytToken;
     UsdtDepositManager public depositManager;
 
     uint256 private deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -36,7 +36,7 @@ contract DeployUsdtDepositManager is Script {
     }
 
     function deployJpytToken() private {
-        jpytToken = new JpytToken(DEFAULT_ADMIN);
+        jpytToken = new DephaserJPY(DEFAULT_ADMIN);
         console2.log("JpytToken deployed at:", address(jpytToken));
     }
 
