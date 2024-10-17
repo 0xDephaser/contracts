@@ -13,6 +13,20 @@ Dephaser is a decentralized finance (DeFi) protocol that allows users to deposit
 7. **Protocol Fees**: Ability to set and collect protocol fees on deposits.
 8. **Yield Distribution**: Plans for distributing Aave-generated profits back to users.
 
+## Audit
+
+Dephaser has undergone a thorough security audit conducted by Solidproof. The audit report can be found in the following location:
+
+[Solidproof Audit Report](https://github.com/solidproof/Projects/tree/main/2024/Dephaser)
+
+The audit process involved a comprehensive review of the smart contract code, focusing on potential vulnerabilities, code quality, and adherence to best practices in blockchain development. We encourage all users and stakeholders to review the audit report for a detailed understanding of the security measures in place.
+
+Key highlights from the audit:
+- Identification and resolution of potential security issues
+- Verification of contract functionality
+
+By undergoing this audit, Dephaser demonstrates its commitment to security and transparency in the DeFi space. We will continue to prioritize the safety of user funds and the integrity of our protocol.
+
 ## Smart Contracts
 
 - **DepositManager**: The main contract handling deposits, withdrawals, and interactions with Aave and Chainlink.
